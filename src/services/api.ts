@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import { realtimeService } from './realtime';
 import type {
   CreateGameSessionResponse,
   LoginResponse,
@@ -114,6 +115,10 @@ class ApiService {
         game_name,
       }
     );
+
+    // Emit real-time update for game space occupancy change
+    realtimeService.updateGameSpace(game_space_id, { occupied: 'Occupied' });
+
     return response.data.message;
   }
 
@@ -127,6 +132,13 @@ class ApiService {
         game_space_id,
       }
     );
+
+    // Emit real-time update for game space occupancy change
+    realtimeService.updateGameSpace(game_space_id, { occupied: 'Not Occupied' });
+
+    // Emit session termination event
+    realtimeService.notifySessionTerminated('terminated_session', response.data.message);
+
     return response.data.message;
   }
 
@@ -142,6 +154,10 @@ class ApiService {
         game_space_id: data.game_space_id,
       }
     );
+
+    // Emit real-time payment event
+    realtimeService.notifyPaymentProcessed(response.data.message, data.amount, 'cash');
+
     return response.data.message;
   }
 
@@ -161,6 +177,10 @@ class ApiService {
         game_space_id: data.game_space_id,
       }
     );
+
+    // Emit real-time payment event
+    realtimeService.notifyPaymentProcessed(response.data.message, data.amount, 'mpesa');
+
     return response.data.message;
   }
 
@@ -180,6 +200,10 @@ class ApiService {
         game_space_id: data.game_space_id,
       }
     );
+
+    // Emit real-time payment event
+    realtimeService.notifyPaymentProcessed(response.data.message, data.amount, 'bank');
+
     return response.data.message;
   }
 
@@ -194,6 +218,10 @@ class ApiService {
         message,
       }
     );
+
+    // Emit real-time caffe action event
+    realtimeService.notifyCaffeAction(message);
+
     return response.data.message;
   }
 

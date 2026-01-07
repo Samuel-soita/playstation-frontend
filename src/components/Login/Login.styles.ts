@@ -75,10 +75,10 @@ const ripple = keyframes`
 
 const glowPulse = keyframes`
   0%, 100% {
-    boxShadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    boxShadow: 0 0 5px rgba(251, 191, 36, 0.5);
   }
   50% {
-    boxShadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.4);
+    boxShadow: 0 0 20px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.4);
   }
 `;
 
@@ -124,8 +124,8 @@ export const loginWrapper = (theme: Theme, shake: boolean = false, success: bool
   background: theme.palette.mode === 'dark' 
     ? 'rgba(20, 20, 20, 0.85)' 
     : 'rgba(255, 255, 255, 0.95)',
-  border: success 
-    ? '2px solid rgba(76, 175, 80, 0.6)'
+  border: success
+    ? '2px solid rgba(245, 158, 11, 0.6)'
     : theme.palette.mode === 'dark'
     ? '1px solid rgba(255, 255, 255, 0.1)'
     : '1px solid rgba(0, 0, 0, 0.1)',
@@ -134,7 +134,7 @@ export const loginWrapper = (theme: Theme, shake: boolean = false, success: bool
   padding: { xs: 2, sm: 2.5 },
   borderRadius: 3,
   boxShadow: success
-    ? '0 0 30px rgba(76, 175, 80, 0.4), 0 0 60px rgba(76, 175, 80, 0.2)'
+    ? '0 0 30px rgba(245, 158, 11, 0.4), 0 0 60px rgba(245, 158, 11, 0.2)'
     : theme.palette.mode === 'dark'
     ? '0 0 50px rgba(0,0,0,0.8)'
     : '0 0 50px rgba(0,0,0,0.2)',
@@ -304,24 +304,24 @@ export const submitButton: SxProps<Theme> = {
   fontSize: '0.95rem',
   fontWeight: 600,
   borderRadius: 2,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
   textTransform: 'uppercase',
-  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
   fontFamily: '"Rajdhani", sans-serif',
   letterSpacing: 1,
   position: 'relative',
   overflow: 'hidden',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   '&:hover': {
-    background: 'linear-gradient(135deg, #5568d3 0%, #6a3d91 100%)',
-    boxShadow: '0 6px 16px rgba(102, 126, 234, 0.5)',
+    background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+    boxShadow: '0 6px 16px rgba(245, 158, 11, 0.5)',
     transform: 'translateY(-2px) scale(1.02)',
   },
   '&:active': {
     transform: 'translateY(0) scale(0.98)',
   },
   '&:disabled': {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     opacity: 0.6,
   },
   '&::after': {
