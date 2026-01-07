@@ -176,7 +176,7 @@ export const Login = () => {
         {/* Loading Spinner Overlay */}
         {loading && !success && (
           <Box sx={styles.loadingSpinner}>
-            <CircularProgress size={60} thickness={4} sx={{ color: '#667eea' }} />
+            <CircularProgress size={60} thickness={4} sx={{ color: '#f59e0b' }} />
           </Box>
         )}
         <Box sx={styles.header}>

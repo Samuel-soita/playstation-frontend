@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -13,17 +13,17 @@ interface NavigationProps {
   onItemClick?: () => void;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ variant = 'header', onItemClick }) => {
+export const Navigation: React.FC<NavigationProps> = memo(({ variant = 'header', onItemClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/login');
-  };
+  }, [logout, navigate]);
 
-  const navigationItems = [
+  const navigationItems = useMemo(() => [
     {
       name: 'Dashboard',
       path: '/',
@@ -41,12 +41,27 @@ export const Navigation: React.FC<NavigationProps> = ({ variant = 'header', onIt
       path: '/crud-operations',
       icon: <Build className="w-5 h-5" />,
       description: 'CRUD Operations'
+    },
+    {
+      name: 'Start Gaming',
+      path: '/game-session-workflow',
+      icon: <span className="text-lg">🎯</span>,
+      description: 'Game Session Workflow'
     }
-  ];
+  ], []);
 
   if (variant === 'header') {
     return (
-      <header className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 shadow-2xl sticky top-0 z-50 border-b-4 border-yellow-300">
+      <>
+        {/* Skip Navigation Link */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+        >
+          Skip to main content
+        </a>
+
+        <header className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 shadow-2xl sticky top-0 z-50 border-b-4 border-yellow-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -64,7 +79,9 @@ export const Navigation: React.FC<NavigationProps> = ({ variant = 'header', onIt
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`relative group overflow-hidden px-8 py-4 rounded-full text-sm font-black tracking-wide transition-all duration-500 hover:scale-110 hover:-translate-y-1 ${
+                  aria-current={location.pathname === item.path ? 'page' : undefined}
+                  aria-label={`Navigate to ${item.name} - ${item.description}`}
+                  className={`relative group overflow-hidden px-8 py-4 rounded-full text-sm font-black tracking-wide transition-all duration-500 hover:scale-110 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 ${
                     location.pathname === item.path
                       ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 text-white shadow-2xl shadow-yellow-400/50 border-4 border-yellow-300 animate-pulse-glow'
                       : 'bg-gradient-to-r from-black/30 to-black/20 backdrop-blur-sm text-yellow-100 hover:text-white border-2 border-yellow-400/30 hover:border-yellow-400/60 hover:bg-gradient-to-r hover:from-yellow-500/20 hover:to-amber-500/20'
@@ -174,6 +191,7 @@ export const Navigation: React.FC<NavigationProps> = ({ variant = 'header', onIt
           </nav>
         </div>
       </header>
+      </>
     );
   }
 
@@ -243,4 +261,4 @@ export const Navigation: React.FC<NavigationProps> = ({ variant = 'header', onIt
       </nav>
     </aside>
   );
-};
+});

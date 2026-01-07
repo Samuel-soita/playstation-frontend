@@ -1,41 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  MenuItem,
-  Card,
-  CardContent,
-  CardActions,
-  Grid,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  FormControl,
-  InputLabel,
-  Select,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
-import { PlayArrow, Stop, Payment, Games, SpaceDashboard, Receipt, LocalCafe, Settings, CheckCircle, Cancel } from '@mui/icons-material';
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Chip from '@mui/material/Chip';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import { PlayArrow, Stop, Payment, Games, SpaceDashboard, Receipt, LocalCafe, Settings, ArrowForward, ArrowBack } from '@mui/icons-material';
 import { apiService } from '@/services/api';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { ImageBackground } from '@/components/ImageBackground';
+import { useRealtime } from '@/hooks/useRealtime';
 import {
-  GameSpace,
   Game,
   GameSession,
   SalesInvoice,
@@ -64,6 +59,7 @@ function TabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`crud-tabpanel-${index}`}
       aria-labelledby={`crud-tab-${index}`}
+      aria-hidden={value !== index}
       {...other}
       className={`p-6 animate-fade-in ${value === index ? 'block' : 'hidden'}`}
     >
@@ -72,7 +68,9 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export const CrudOperations = () => {
+export const CrudOperations = memo(() => {
+  const navigate = useNavigate();
+  const { gameSpaces, activeSessions, connectionStatus, initializeData, notifications } = useRealtime();
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
@@ -82,9 +80,7 @@ export const CrudOperations = () => {
   });
 
   // Game Session State
-  const [gameSpaces, setGameSpaces] = useState<GameSpace[]>([]);
   const [games, setGames] = useState<Game[]>([]);
-  const [activeSessions, setActiveSessions] = useState<GameSession[]>([]);
   const [selectedGameSpace, setSelectedGameSpace] = useState('');
   const [selectedGame, setSelectedGame] = useState('');
 
@@ -140,6 +136,57 @@ export const CrudOperations = () => {
     loadInitialData();
   }, []);
 
+  // Navigation functions for interconnected tabs
+  const navigateToTab = useCallback((tabIndex: number) => {
+    setTabValue(tabIndex);
+  }, []);
+
+  const navigateToRelatedTabs = useCallback((currentTab: number) => {
+    const relatedTabs: Record<number, number[]> = {
+      0: [1, 2, 13], // Game Spaces -> Games, Sessions, All Sessions
+      1: [0, 2], // Games -> Game Spaces, Sessions
+      2: [0, 1, 3], // Sessions -> Game Spaces, Games, Invoices
+      3: [4, 7, 8], // Invoices -> Payments, M-Pesa, Payment Entries
+      4: [3, 7, 8], // Payments -> Invoices, M-Pesa, Payment Entries
+      7: [3, 4, 8], // M-Pesa -> Invoices, Payments, Payment Entries
+      8: [3, 4, 7], // Payment Entries -> Invoices, Payments, M-Pesa
+      5: [6], // Caffe -> Caffe Settings
+      6: [5], // Caffe Settings -> Caffe
+      9: [10, 11, 12], // Customers -> Companies, Accounts, Items
+      10: [9, 11, 12], // Companies -> Customers, Accounts, Items
+      11: [9, 10, 12], // Accounts -> Customers, Companies, Items
+      12: [9, 10, 11], // Items -> Customers, Companies, Accounts
+      13: [0, 1, 2], // All Sessions -> Game Spaces, Games, Sessions
+      14: [3, 4, 5], // Reports -> Invoices, Payments, Caffe
+    };
+    return relatedTabs[currentTab] || [];
+  }, []);
+
+  // Keyboard navigation for tabs
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const currentIndex = Array.from(tabs).findIndex(tab => tab.getAttribute('aria-selected') === 'true');
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      const nextTab = tabs[nextIndex] as HTMLElement;
+      nextTab.click();
+      nextTab.focus();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
+      const prevTab = tabs[prevIndex] as HTMLElement;
+      prevTab.click();
+      prevTab.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
   const loadInitialData = async () => {
     try {
       setLoading(true);
@@ -177,9 +224,7 @@ export const CrudOperations = () => {
         apiService.getAllGameSessions(),
       ]);
 
-      setGameSpaces(gameSpacesData);
       setGames(gamesData);
-      setActiveSessions(sessionsData);
       setSalesInvoices(invoicesData);
       setCaffe(caffeData);
       setCaffeSettings(caffeSettingsData);
@@ -192,6 +237,9 @@ export const CrudOperations = () => {
       setAccounts(accountsData);
       setItems(itemsData);
       setAllGameSessions(allSessionsData);
+
+      // Initialize real-time data
+      initializeData(gameSpacesData, sessionsData);
     } catch (error: any) {
       showSnackbar(error.message || 'Failed to load data', 'error');
     } finally {
@@ -297,10 +345,10 @@ export const CrudOperations = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
-
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <ImageBackground variant="gaming" className="flex-1">
+        <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 bg-clip-text text-transparent mb-4 animate-pulse-glow">
             ⚡ CRUD Operations Demo
@@ -308,10 +356,93 @@ export const CrudOperations = () => {
           <p className="text-yellow-800 text-lg font-medium bg-yellow-50 px-6 py-3 rounded-2xl border-2 border-yellow-300 inline-block">
             Test all available backend operations for the PlayStation Digital System
           </p>
+
+          {/* Real-time Status & Navigation */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            {/* Real-time Connection Status */}
+            <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-xl border border-yellow-200">
+              <div className={`w-3 h-3 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500 animate-pulse' :
+                connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                'bg-red-500'
+              }`}></div>
+              <span className="text-sm font-medium text-gray-700">
+                Real-time: {connectionStatus}
+              </span>
+            </div>
+
+            {/* Tab Navigation Controls */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105"
+              >
+                <ArrowBack className="w-4 h-4" />
+                Dashboard
+              </button>
+
+              <button
+                onClick={() => navigate('/caffe')}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105"
+              >
+                Caffe
+                <ArrowForward className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Related Tabs Navigation */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Related:</span>
+              {navigateToRelatedTabs(tabValue).slice(0, 3).map((relatedTabIndex) => {
+                const tabLabels = [
+                  "Game Spaces", "Games", "Sessions", "Invoices", "Payments",
+                  "Caffe", "Caffe Settings", "M-Pesa", "Payment Entries", "Customers",
+                  "Companies", "Accounts", "Items", "All Sessions", "Reports"
+                ];
+                return (
+                  <button
+                    key={relatedTabIndex}
+                    onClick={() => navigateToTab(relatedTabIndex)}
+                    className="px-3 py-1 text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md transition-colors duration-200"
+                  >
+                    {tabLabels[relatedTabIndex]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Real-time Notifications */}
+          {(notifications.payments.length > 0 || notifications.caffeActions.length > 0 || notifications.sessionEvents.length > 0) && (
+            <div className="mt-4 p-4 bg-white/95 rounded-xl border border-yellow-200 max-w-4xl mx-auto">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Recent Activity:</h3>
+              <div className="flex flex-wrap gap-2">
+                {notifications.sessionEvents.slice(-2).map((event, idx) => (
+                  <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                    {event.type === 'created' ? '🎮' : '🏁'} Session {event.type}
+                  </span>
+                ))}
+                {notifications.payments.slice(-2).map((payment, idx) => (
+                  <span key={idx} className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                    💰 {payment.method.toUpperCase()} Payment
+                  </span>
+                ))}
+                {notifications.caffeActions.slice(-2).map((_, idx) => (
+                  <span key={idx} className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                    ☕ Action logged
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Organized Tabs */}
-        <div className="bg-gradient-to-r from-yellow-50 via-amber-50 to-orange-50 border-4 border-yellow-300 rounded-3xl shadow-2xl overflow-hidden mb-8">
+        <div
+          className="bg-gradient-to-r from-yellow-50 via-amber-50 to-orange-50 border-4 border-yellow-300 rounded-3xl shadow-2xl overflow-hidden mb-8"
+          role="tablist"
+          aria-label="CRUD Operations Navigation"
+        >
           {/* Gaming Operations */}
           <div className="p-6 border-b-4 border-yellow-300 bg-gradient-to-r from-yellow-100 to-amber-100">
             <h3 className="text-lg font-bold text-yellow-800 uppercase tracking-wide mb-4 flex items-center gap-2">
@@ -327,7 +458,12 @@ export const CrudOperations = () => {
                 <button
                   key={tab.value}
                   onClick={() => setTabValue(tab.value)}
-                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max ${
+                  role="tab"
+                  aria-selected={tabValue === tab.value}
+                  aria-controls={`crud-tabpanel-${tab.value}`}
+                  id={`crud-tab-${tab.value}`}
+                  tabIndex={tabValue === tab.value ? 0 : -1}
+                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 ${
                     tabValue === tab.value
                       ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-yellow-300/50 border-2 border-yellow-300'
                       : 'bg-white/90 hover:bg-yellow-100 text-gray-700 hover:text-yellow-800 border-2 border-transparent hover:border-yellow-300'
@@ -360,7 +496,12 @@ export const CrudOperations = () => {
                 <button
                   key={tab.value}
                   onClick={() => setTabValue(tab.value)}
-                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max ${
+                  role="tab"
+                  aria-selected={tabValue === tab.value}
+                  aria-controls={`crud-tabpanel-${tab.value}`}
+                  id={`crud-tab-${tab.value}`}
+                  tabIndex={tabValue === tab.value ? 0 : -1}
+                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 ${
                     tabValue === tab.value
                       ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-yellow-300/50 border-2 border-yellow-300'
                       : 'bg-white/90 hover:bg-yellow-100 text-gray-700 hover:text-yellow-800 border-2 border-transparent hover:border-yellow-300'
@@ -393,7 +534,12 @@ export const CrudOperations = () => {
                 <button
                   key={tab.value}
                   onClick={() => setTabValue(tab.value)}
-                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max ${
+                  role="tab"
+                  aria-selected={tabValue === tab.value}
+                  aria-controls={`crud-tabpanel-${tab.value}`}
+                  id={`crud-tab-${tab.value}`}
+                  tabIndex={tabValue === tab.value ? 0 : -1}
+                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 ${
                     tabValue === tab.value
                       ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-yellow-300/50 border-2 border-yellow-300'
                       : 'bg-white/90 hover:bg-yellow-100 text-gray-700 hover:text-yellow-800 border-2 border-transparent hover:border-yellow-300'
@@ -425,7 +571,12 @@ export const CrudOperations = () => {
                 <button
                   key={tab.value}
                   onClick={() => setTabValue(tab.value)}
-                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max ${
+                  role="tab"
+                  aria-selected={tabValue === tab.value}
+                  aria-controls={`crud-tabpanel-${tab.value}`}
+                  id={`crud-tab-${tab.value}`}
+                  tabIndex={tabValue === tab.value ? 0 : -1}
+                  className={`flex flex-col items-center gap-2 px-4 py-4 text-sm font-bold transition-all duration-300 rounded-2xl hover:scale-105 hover:shadow-lg min-w-max focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 ${
                     tabValue === tab.value
                       ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-yellow-300/50 border-2 border-yellow-300'
                       : 'bg-white/90 hover:bg-yellow-100 text-gray-700 hover:text-yellow-800 border-2 border-transparent hover:border-yellow-300'
@@ -451,24 +602,32 @@ export const CrudOperations = () => {
           Read operations for Game Spaces. These are typically created in the backend.
         </Typography>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {gameSpaces.map((space) => (
-            <Grid item xs={12} sm={6} md={4} key={space.name}>
-              <div className="card-hover bg-card border border-border rounded-lg p-4 shadow-elegant">
-                <h3 className="text-lg font-semibold mb-2">{space.game_space_id}</h3>
-                <p className="text-muted-foreground text-sm">
-                  Type: {space.playstation_type || 'N/A'}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  TV: {space.tv_type || 'N/A'}
-                </p>
-                <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-2 ${
-                  space.occupied === 'Occupied'
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-accent/10 text-accent'
-                }`}>
-                  {space.occupied}
-                </span>
+            <Grid item xs={12} sm={6} md={4} lg={3} key={space.name}>
+              <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold mb-3 text-foreground">{space.game_space_id}</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-sm font-medium">Type:</span>
+                      <span className="text-sm font-semibold">{space.playstation_type || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-sm font-medium">TV:</span>
+                      <span className="text-sm font-semibold">{space.tv_type || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-border">
+                  <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${
+                    space.occupied === 'Occupied'
+                      ? 'bg-red-100 text-red-800 border border-red-200'
+                      : 'bg-green-100 text-green-800 border border-green-200'
+                  }`}>
+                    {space.occupied}
+                  </span>
+                </div>
               </div>
             </Grid>
           ))}
@@ -482,24 +641,31 @@ export const CrudOperations = () => {
           Read operations for Games. These are typically created in the backend.
         </Typography>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {games.map((game) => (
-            <Grid item xs={12} sm={6} md={4} key={game.name}>
-              <div className="card-hover bg-card border border-border rounded-lg p-4 shadow-elegant">
-                <h3 className="text-lg font-semibold mb-2">{game.name_of_the_game}</h3>
-                <p className="text-muted-foreground text-sm mb-1">
-                  Pricing: {game.pricing_rate}
-                </p>
-                {game.game_pricing && (
-                  <p className="text-muted-foreground text-sm">
-                    Price: {game.game_pricing} KES
-                  </p>
-                )}
-                {game.rate_per_hour && (
-                  <p className="text-muted-foreground text-sm">
-                    Rate/Hour: {game.rate_per_hour} KES
-                  </p>
-                )}
+            <Grid item xs={12} sm={6} md={4} lg={3} key={game.name}>
+              <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold mb-3 text-foreground">{game.name_of_the_game}</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-sm font-medium">Pricing:</span>
+                      <span className="text-sm font-semibold">{game.pricing_rate}</span>
+                    </div>
+                    {game.game_pricing && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground text-sm font-medium">Price:</span>
+                        <span className="text-sm font-semibold text-green-600">{game.game_pricing} KES</span>
+                      </div>
+                    )}
+                    {game.rate_per_hour && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground text-sm font-medium">Rate/Hour:</span>
+                        <span className="text-sm font-semibold text-blue-600">{game.rate_per_hour} KES</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </Grid>
           ))}
@@ -513,9 +679,24 @@ export const CrudOperations = () => {
           Create and terminate game sessions, view active sessions.
         </Typography>
 
+        {/* Quick Actions */}
+        <div className="card-hover bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-bold mb-4 text-foreground">🚀 Quick Start Gaming</h2>
+          <p className="text-muted-foreground mb-4">
+            Experience the complete gaming workflow with our guided session manager
+          </p>
+          <button
+            onClick={() => navigate('/game-session-workflow')}
+            className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
+          >
+            <span className="text-xl">🎯</span>
+            Start Guided Gaming Session
+          </button>
+        </div>
+
         {/* Create Session Section */}
-        <div className="bg-card border border-border rounded-lg p-6 mb-6 shadow-elegant">
-          <h2 className="text-xl font-semibold mb-4">Create New Game Session</h2>
+        <div className="card-hover bg-card border border-border rounded-xl p-6 mb-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-bold mb-4 text-foreground">🎮 Create New Game Session (Advanced)</h2>
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
@@ -563,8 +744,8 @@ export const CrudOperations = () => {
         </div>
 
         {/* Active Sessions Section */}
-        <div className="bg-card border border-border rounded-lg p-6 shadow-elegant">
-          <h2 className="text-xl font-semibold mb-4">Active Game Sessions</h2>
+        <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-bold mb-4 text-foreground">⏰ Active Game Sessions</h2>
           {activeSessions.length === 0 ? (
             <Typography color="text.secondary">No active sessions</Typography>
           ) : (
@@ -666,42 +847,46 @@ export const CrudOperations = () => {
           Create payments for outstanding invoices (Cash, M-Pesa, Bank).
         </Typography>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {salesInvoices
             .filter(invoice => (invoice.outstanding_amount || 0) > 0)
             .map((invoice) => (
-              <Grid item xs={12} md={6} key={invoice.name}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">Invoice {invoice.name}</Typography>
-                    <Typography>Outstanding: {invoice.outstanding_amount || 0} {invoice.currency}</Typography>
-                    <Typography color="text.secondary">Customer: {invoice.customer}</Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      size="small"
-                      variant="outlined"
+              <Grid item xs={12} sm={6} md={4} lg={3} key={invoice.name}>
+                <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold mb-3 text-foreground">Invoice {invoice.name}</h3>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground text-sm font-medium">Outstanding:</span>
+                        <span className="text-sm font-bold text-red-600">{invoice.outstanding_amount || 0} {invoice.currency}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground text-sm font-medium">Customer:</span>
+                        <span className="text-sm font-semibold">{invoice.customer}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="flex-1 px-3 py-2 text-xs font-bold bg-green-100 hover:bg-green-200 text-green-800 rounded-lg transition-colors duration-200"
                       onClick={() => setPaymentDialog({ open: true, invoice, mode: 'cash' })}
-                      startIcon={<Payment />}
                     >
-                      Cash
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
+                      💵 Cash
+                    </button>
+                    <button
+                      className="flex-1 px-3 py-2 text-xs font-bold bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg transition-colors duration-200"
                       onClick={() => setPaymentDialog({ open: true, invoice, mode: 'mpesa' })}
                     >
-                      M-Pesa
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
+                      📱 M-Pesa
+                    </button>
+                    <button
+                      className="flex-1 px-3 py-2 text-xs font-bold bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition-colors duration-200"
                       onClick={() => setPaymentDialog({ open: true, invoice, mode: 'bank' })}
                     >
-                      Bank
-                    </Button>
-                  </CardActions>
-                </Card>
+                      🏦 Bank
+                    </button>
+                  </div>
+                </div>
               </Grid>
             ))}
         </Grid>
@@ -715,58 +900,55 @@ export const CrudOperations = () => {
         </Typography>
 
         {caffe && (
-          <Grid container spacing={3}>
+          <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">Caffe Settings</Typography>
-                  <Typography>Register Open: {caffe.custom_register_open ? 'Yes' : 'No'}</Typography>
+              <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+                <h3 className="text-lg font-bold mb-4 text-foreground">☕ Caffe Settings</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground text-sm font-medium">Register Open:</span>
+                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                      caffe.custom_register_open
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {caffe.custom_register_open ? 'Yes' : 'No'}
+                    </span>
+                  </div>
                   {caffe.custom_custom_logs && (
-                    <>
-                      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Recent Logs:</Typography>
-                      <Box sx={{
-                        maxHeight: 200,
-                        overflow: 'auto',
-                        bgcolor: 'grey.100',
-                        p: 1,
-                        borderRadius: 1,
-                        fontFamily: 'monospace',
-                        fontSize: '0.875rem'
-                      }}>
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground mb-2">Recent Logs:</h4>
+                      <div className="max-h-40 overflow-auto bg-gray-50 p-3 rounded-lg border font-mono text-xs text-gray-700">
                         {caffe.custom_custom_logs.split('\n').slice(-5).map((log: string, index: number) => (
-                          <div key={index}>{log}</div>
+                          <div key={index} className="mb-1">{log}</div>
                         ))}
-                      </Box>
-                    </>
+                      </div>
+                    </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">Log Action</Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    label="Action Message"
+              <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+                <h3 className="text-lg font-bold mb-4 text-foreground">📝 Log Action</h3>
+                <div className="space-y-4">
+                  <textarea
+                    className="w-full p-3 border border-border rounded-lg resize-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-colors"
+                    rows={4}
+                    placeholder="Enter action message..."
                     value={actionMessage}
                     onChange={(e) => setActionMessage(e.target.value)}
-                    sx={{ mt: 1 }}
                   />
-                </CardContent>
-                <CardActions>
-                  <Button
-                    variant="contained"
+                  <button
+                    className="w-full px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-white font-bold rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleLogAction}
                     disabled={loading || !actionMessage}
                   >
-                    Log Action
-                  </Button>
-                </CardActions>
-              </Card>
+                    {loading ? 'Logging...' : 'Log Action'}
+                  </button>
+                </div>
+              </div>
             </Grid>
           </Grid>
         )}
@@ -779,56 +961,96 @@ export const CrudOperations = () => {
           Read Caffe Settings and check business status.
         </Typography>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Business Status</Typography>
-                <Box sx={{ mt: 2 }}>
-                  <FormControlLabel
-                    control={<Switch checked={isAutomaticClosureEnabled} readOnly />}
-                    label="Automatic Closure Enabled"
-                  />
-                  <FormControlLabel
-                    control={<Switch checked={isBusinessClosed} readOnly />}
-                    label="Business Currently Closed"
-                  />
-                </Box>
-                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>Status:</Typography>
+            <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+              <h3 className="text-lg font-bold mb-4 text-foreground">🏪 Business Status</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm font-medium">Automatic Closure:</span>
+                  <div className={`px-3 py-1 text-xs font-bold rounded-full ${
+                    isAutomaticClosureEnabled
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {isAutomaticClosureEnabled ? 'Enabled' : 'Disabled'}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm font-medium">Business Status:</span>
+                  <div className={`px-3 py-1 text-xs font-bold rounded-full ${
+                    isBusinessClosed
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {isBusinessClosed ? 'Closed' : 'Open'}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2 border-t border-border">
+                  <span className="text-sm font-medium">Current Status:</span>
                   {isBusinessClosed ? (
-                    <>
-                      <Cancel color="error" />
-                      <Typography color="error">Closed</Typography>
-                    </>
+                    <div className="flex items-center gap-2 text-red-600">
+                      <span className="text-lg">❌</span>
+                      <span className="font-semibold">Closed</span>
+                    </div>
                   ) : (
-                    <>
-                      <CheckCircle color="success" />
-                      <Typography color="success.main">Open</Typography>
-                    </>
+                    <div className="flex items-center gap-2 text-green-600">
+                      <span className="text-lg">✅</span>
+                      <span className="font-semibold">Open</span>
+                    </div>
                   )}
-                </Box>
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+            </div>
           </Grid>
 
           {caffeSettings && (
             <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">Settings Details</Typography>
-                  <Typography>Start Time: {caffeSettings.start_time || 'Not set'}</Typography>
-                  <Typography>End Time: {caffeSettings.end_time || 'Not set'}</Typography>
-                  <Typography>Auto Email Sales: {caffeSettings.auto_email_daily_sales_reports ? 'Yes' : 'No'}</Typography>
-                  <Typography>Auto Email Logs: {caffeSettings.auto_email_daily_session_logs_reports ? 'Yes' : 'No'}</Typography>
+              <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+                <h3 className="text-lg font-bold mb-4 text-foreground">⚙️ Settings Details</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground text-sm font-medium">Start Time:</span>
+                    <span className="text-sm font-semibold">{caffeSettings.start_time || 'Not set'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground text-sm font-medium">End Time:</span>
+                    <span className="text-sm font-semibold">{caffeSettings.end_time || 'Not set'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground text-sm font-medium">Auto Email Sales:</span>
+                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                      caffeSettings.auto_email_daily_sales_reports
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {caffeSettings.auto_email_daily_sales_reports ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground text-sm font-medium">Auto Email Logs:</span>
+                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                      caffeSettings.auto_email_daily_session_logs_reports
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {caffeSettings.auto_email_daily_session_logs_reports ? 'Yes' : 'No'}
+                    </span>
+                  </div>
                   {caffeSettings.specific_emails && (
-                    <Typography>Sales Recipients: {caffeSettings.specific_emails}</Typography>
+                    <div className="pt-3 border-t border-border">
+                      <div className="text-xs text-muted-foreground font-medium mb-1">Sales Recipients:</div>
+                      <div className="text-sm font-semibold break-all">{caffeSettings.specific_emails}</div>
+                    </div>
                   )}
                   {caffeSettings.specific_addresses && (
-                    <Typography>Log Recipients: {caffeSettings.specific_addresses}</Typography>
+                    <div className="pt-3 border-t border-border">
+                      <div className="text-xs text-muted-foreground font-medium mb-1">Log Recipients:</div>
+                      <div className="text-sm font-semibold break-all">{caffeSettings.specific_addresses}</div>
+                    </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </Grid>
           )}
         </Grid>
@@ -1138,8 +1360,8 @@ export const CrudOperations = () => {
         </Typography>
 
         {/* Today's Invoices Summary */}
-        <div className="bg-card border border-border rounded-lg p-6 mb-6 shadow-elegant">
-          <h2 className="text-xl font-semibold mb-4">Today's Invoices Summary</h2>
+        <div className="card-hover bg-card border border-border rounded-xl p-6 mb-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-bold mb-4 text-foreground">📊 Today's Invoices Summary</h2>
           <Button
             variant="outlined"
             onClick={async () => {
@@ -1195,8 +1417,8 @@ export const CrudOperations = () => {
         </div>
 
         {/* Send PDF Report */}
-        <div className="bg-card border border-border rounded-lg p-6 shadow-elegant">
-          <h2 className="text-xl font-semibold mb-4">Send PDF Report</h2>
+        <div className="card-hover bg-card border border-border rounded-xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-bold mb-4 text-foreground">📧 Send PDF Report</h2>
           <TextField
             fullWidth
             label="Email Address"
@@ -1343,6 +1565,7 @@ export const CrudOperations = () => {
 
       <Footer />
       </main>
+    </ImageBackground>
     </div>
   );
-};
+});

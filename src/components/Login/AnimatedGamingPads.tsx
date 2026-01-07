@@ -70,7 +70,7 @@ export const AnimatedGamingPads = () => {
             rx="50"
             ry="35"
             fill="url(#gradient1)"
-            stroke="#667eea"
+            stroke="#f59e0b"
             strokeWidth="2"
           />
           {/* Left stick */}
@@ -78,7 +78,7 @@ export const AnimatedGamingPads = () => {
             cx="40"
             cy="50"
             r="8"
-            fill="#764ba2"
+            fill="#d97706"
             opacity="0.9"
           >
             <animate
@@ -93,7 +93,7 @@ export const AnimatedGamingPads = () => {
             cx="80"
             cy="50"
             r="8"
-            fill="#764ba2"
+            fill="#d97706"
             opacity="0.9"
           >
             <animate
@@ -127,8 +127,8 @@ export const AnimatedGamingPads = () => {
           {/* Gradient definition */}
           <defs>
             <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#667eea" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#764ba2" stopOpacity="0.9" />
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#d97706" stopOpacity="0.9" />
             </linearGradient>
           </defs>
         </Box>
@@ -161,7 +161,7 @@ export const AnimatedGamingPads = () => {
             rx="50"
             ry="35"
             fill="url(#gradient2)"
-            stroke="#764ba2"
+            stroke="#d97706"
             strokeWidth="2"
           />
           {/* Left stick */}
@@ -169,7 +169,7 @@ export const AnimatedGamingPads = () => {
             cx="40"
             cy="50"
             r="8"
-            fill="#667eea"
+            fill="#f59e0b"
             opacity="0.9"
           >
             <animate
@@ -185,7 +185,7 @@ export const AnimatedGamingPads = () => {
             cx="80"
             cy="50"
             r="8"
-            fill="#667eea"
+            fill="#f59e0b"
             opacity="0.9"
           >
             <animate
@@ -220,8 +220,8 @@ export const AnimatedGamingPads = () => {
           {/* Gradient definition */}
           <defs>
             <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#764ba2" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#667eea" stopOpacity="0.9" />
+              <stop offset="0%" stopColor="#d97706" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.9" />
             </linearGradient>
           </defs>
         </Box>
