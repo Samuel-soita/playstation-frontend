@@ -11,6 +11,7 @@ const Dashboard = lazy(() => import('@/pages/Dashboard').then(module => ({ defau
 const Portal = lazy(() => import('@/pages/Portal').then(module => ({ default: module.Portal })));
 const Caffe = lazy(() => import('@/pages/Caffe').then(module => ({ default: module.Caffe })));
 const CrudOperations = lazy(() => import('@/pages/CrudOperations').then(module => ({ default: module.CrudOperations })));
+const GameSessionWorkflowPage = lazy(() => import('@/pages/GameSessionWorkflow').then(module => ({ default: module.GameSessionWorkflowPage })));
 
 // Loading component for lazy-loaded routes
 const LoadingFallback = () => (
@@ -52,6 +53,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CrudOperations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/game-session-workflow"
+                element={
+                  <ProtectedRoute>
+                    <GameSessionWorkflowPage />
                   </ProtectedRoute>
                 }
               />

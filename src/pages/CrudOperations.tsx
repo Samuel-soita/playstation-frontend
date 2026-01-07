@@ -679,9 +679,24 @@ export const CrudOperations = memo(() => {
           Create and terminate game sessions, view active sessions.
         </Typography>
 
+        {/* Quick Actions */}
+        <div className="card-hover bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6 shadow-elegant hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-bold mb-4 text-foreground">🚀 Quick Start Gaming</h2>
+          <p className="text-muted-foreground mb-4">
+            Experience the complete gaming workflow with our guided session manager
+          </p>
+          <button
+            onClick={() => navigate('/game-session-workflow')}
+            className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
+          >
+            <span className="text-xl">🎯</span>
+            Start Guided Gaming Session
+          </button>
+        </div>
+
         {/* Create Session Section */}
         <div className="card-hover bg-card border border-border rounded-xl p-6 mb-6 shadow-elegant hover:shadow-lg transition-all duration-300">
-          <h2 className="text-xl font-bold mb-4 text-foreground">🎮 Create New Game Session</h2>
+          <h2 className="text-xl font-bold mb-4 text-foreground">🎮 Create New Game Session (Advanced)</h2>
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>

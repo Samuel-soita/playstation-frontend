@@ -41,6 +41,12 @@ export const Navigation: React.FC<NavigationProps> = memo(({ variant = 'header',
       path: '/crud-operations',
       icon: <Build className="w-5 h-5" />,
       description: 'CRUD Operations'
+    },
+    {
+      name: 'Start Gaming',
+      path: '/game-session-workflow',
+      icon: <span className="text-lg">🎯</span>,
+      description: 'Game Session Workflow'
     }
   ], []);
 
