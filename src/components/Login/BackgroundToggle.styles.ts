@@ -18,9 +18,9 @@ export const formControl: SxProps<Theme> = {
 
 export const switchStyles: SxProps<Theme> = {
   '& .MuiSwitch-switchBase.Mui-checked': {
-    color: '#667eea',
+    color: '#f59e0b',
     '& + .MuiSwitch-track': {
-      backgroundColor: '#667eea',
+      backgroundColor: '#f59e0b',
     },
   },
   '& .MuiSwitch-track': {
