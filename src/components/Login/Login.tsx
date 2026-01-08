@@ -228,7 +228,7 @@ export const Login = () => {
                 autoComplete="current-password"
                 error={!!passwordError}
                 helperText={passwordError || 'Minimum 6 characters'}
-                sx={styles.textField(theme, !!passwordError)}
+                sx={styles.passwordField(theme, !!passwordError)}
                 InputProps={{
                   sx: styles.input,
                   endAdornment: (
@@ -238,6 +238,13 @@ export const Login = () => {
                         edge="end"
                         aria-label="toggle password visibility"
                         tabIndex={-1}
+                        sx={{
+                          color: '#f59e0b',
+                          '&:hover': {
+                            color: '#d97706',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                          },
+                        }}
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
