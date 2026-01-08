@@ -40,12 +40,29 @@ export const backgroundContainer: SxProps<Theme> = {
   width: '100%',
   height: '100%',
   zIndex: -1,
-  backgroundImage: 'url(/assets/images/login-background.jpg)',
+  backgroundImage: 'url(/assets/images/backgrounds/dashboard-bg.jpg)',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
-  animation: `${panImage} 20s infinite alternate linear`,
-  // Fallback gradient if image doesn't load
-  backgroundColor: '#000',
+  animation: `${panImage} 25s infinite alternate linear`,
+  // Enhanced fallback gradient for gaming theme
+  background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
+  // Add subtle pattern overlay
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `
+      radial-gradient(circle at 20% 80%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(217, 119, 6, 0.08) 0%, transparent 50%)
+    `,
+    backgroundSize: '100% 100%, 100% 100%, 100% 100%',
+    backgroundPosition: '0% 0%, 100% 100%, 50% 50%',
+    animation: `${panImage} 30s infinite alternate linear`,
+  },
 };
 
 export const overlay: SxProps<Theme> = {
@@ -101,33 +118,53 @@ export const optionsContainer: SxProps<Theme> = {
 
 export const portalCard: SxProps<Theme> = {
   flex: 1,
-  minWidth: 280,
-  background: 'rgba(255, 255, 255, 0.03)',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
-  padding: { xs: 3, sm: 5 },
-  borderRadius: 2,
+  minWidth: 320,
+  background: 'rgba(255, 255, 255, 0.05)',
+  border: '2px solid rgba(255, 255, 255, 0.15)',
+  padding: { xs: 4, sm: 6 },
+  borderRadius: 4,
   cursor: 'pointer',
-  transition: 'all 0.4s ease',
+  transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
   position: 'relative',
   overflow: 'hidden',
   borderBottom: '4px solid transparent',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+    transition: 'left 0.6s ease',
+  },
+  '&:hover::before': {
+    left: '100%',
+  },
 };
 
 export const gamesPortal: SxProps<Theme> = {
   '&:hover': {
-    transform: 'translateY(-10px)',
-    background: 'rgba(189, 0, 255, 0.15)',
-    borderColor: '#bd00ff',
-    boxShadow: '0 0 40px rgba(189, 0, 255, 0.3)',
+    transform: 'translateY(-15px) scale(1.02)',
+    background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1))',
+    borderColor: '#fbbf24',
+    borderBottomColor: '#fbbf24',
+    boxShadow: '0 20px 60px rgba(251, 191, 36, 0.3), 0 0 100px rgba(245, 158, 11, 0.2)',
+    animation: 'pulse 2s infinite',
   },
 };
 
 export const cyberPortal: SxProps<Theme> = {
   '&:hover': {
-    transform: 'translateY(-10px)',
-    background: 'rgba(0, 255, 242, 0.15)',
+    transform: 'translateY(-15px) scale(1.02)',
+    background: 'linear-gradient(135deg, rgba(0, 255, 242, 0.15), rgba(0, 191, 255, 0.1))',
     borderColor: '#00fff2',
-    boxShadow: '0 0 40px rgba(0, 255, 242, 0.3)',
+    borderBottomColor: '#00fff2',
+    boxShadow: '0 20px 60px rgba(0, 255, 242, 0.3), 0 0 100px rgba(0, 191, 255, 0.2)',
+    animation: 'pulse 2s infinite',
   },
 };
 
@@ -154,34 +191,58 @@ export const portalDescription: SxProps<Theme> = {
 };
 
 export const loginBtn: SxProps<Theme> = {
-  padding: '12px 30px',
-  borderRadius: 1,
+  padding: '16px 40px',
+  borderRadius: 2,
   fontFamily: '"Rajdhani", sans-serif',
-  fontWeight: 700,
-  fontSize: '1.1rem',
+  fontWeight: 800,
+  fontSize: '1.2rem',
   textTransform: 'uppercase',
-  transition: '0.3s',
-  minWidth: 150,
+  letterSpacing: 1,
+  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+  minWidth: 180,
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+    transition: 'left 0.6s ease',
+  },
+  '&:hover::before': {
+    left: '100%',
+  },
 };
 
 export const gamesBtn: SxProps<Theme> = {
-  background: 'transparent',
-  border: '1px solid #bd00ff',
-  color: '#bd00ff',
+  background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05))',
+  border: '2px solid #fbbf24',
+  color: '#fbbf24',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
   '&:hover': {
-    background: '#bd00ff',
-    color: 'white',
-    boxShadow: '0 0 20px #bd00ff',
+    background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+    color: '#000',
+    boxShadow: '0 0 30px rgba(251, 191, 36, 0.6), 0 0 60px rgba(245, 158, 11, 0.4)',
+    transform: 'translateY(-2px)',
+    borderColor: '#f59e0b',
   },
 };
 
 export const cyberBtn: SxProps<Theme> = {
-  background: 'transparent',
-  border: '1px solid #00fff2',
+  background: 'linear-gradient(135deg, rgba(0, 255, 242, 0.1), rgba(0, 191, 255, 0.05))',
+  border: '2px solid #00fff2',
   color: '#00fff2',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
   '&:hover': {
-    background: '#00fff2',
-    color: 'black',
-    boxShadow: '0 0 20px #00fff2',
+    background: 'linear-gradient(135deg, #00fff2, #00bfff)',
+    color: '#000',
+    boxShadow: '0 0 30px rgba(0, 255, 242, 0.6), 0 0 60px rgba(0, 191, 255, 0.4)',
+    transform: 'translateY(-2px)',
+    borderColor: '#00bfff',
   },
 };
