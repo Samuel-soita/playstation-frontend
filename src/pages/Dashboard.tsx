@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
-import { Analytics, Games, PlayArrow, Receipt } from '@mui/icons-material';
+import { Analytics, Games, PlayArrow, Receipt, LocationOn } from '@mui/icons-material';
 import { apiService } from '@/services/api';
 import { GameSpace, Game, GameSession } from '@/types';
 import { GameSpaceGrid } from '@/components/Dashboard/GameSpaceGrid';
@@ -22,6 +22,8 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { VideoBackground } from '@/components/VideoBackground';
 import { ImageBackground } from '@/components/ImageBackground';
+import { GameLibrary } from '@/components/GameLibrary';
+import { GameSpaceManager } from '@/components/GameSpaceManager';
 import { SalesInvoice } from '@/types';
 
 
@@ -342,6 +344,31 @@ export const Dashboard = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Game Management */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-bold text-yellow-800 flex items-center gap-2">
+                  🎯 Game Management
+                </h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setTabValue(9)}
+                    className={`w-full p-4 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+                      tabValue === 9
+                        ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-yellow-300/50'
+                        : 'bg-white/80 hover:bg-yellow-100 text-gray-700 hover:text-yellow-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <LocationOn className="w-6 h-6" />
+                      <div className="text-left">
+                        <div className="font-bold">Space Manager</div>
+                        <div className="text-xs opacity-80">Station Config</div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -501,28 +528,9 @@ export const Dashboard = () => {
           )}
 
             {tabValue === 6 && (
-              <VideoBackground
-                src="/assets/videos/caffe-management.mp4"
-                className="min-h-[500px] rounded-2xl overflow-hidden mb-6"
-                opacity={0.7}
-                blur={0}
-              >
-                <div className="p-6">
-                  <div className="mb-4 pb-3 border-b border-white/20">
-                    <h2 className="text-2xl font-bold text-white mb-2">
-                      Game Library
-                    </h2>
-                    <p className="text-white/80 text-base">
-                      Browse and manage the complete game collection
-                    </p>
-                  </div>
-                  <div className="text-center py-12">
-                    <div className="text-5xl mb-4">🎮</div>
-                    <p className="text-white text-lg font-bold">Game Library Coming Soon</p>
-                    <p className="text-white/70 mt-2">Complete game management system</p>
-                  </div>
-                </div>
-              </VideoBackground>
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg overflow-hidden">
+                <GameLibrary />
+              </div>
           )}
 
             {tabValue === 7 && (
@@ -573,6 +581,12 @@ export const Dashboard = () => {
                   </div>
                 </div>
               </VideoBackground>
+            )}
+
+            {tabValue === 9 && (
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg overflow-hidden">
+                <GameSpaceManager />
+              </div>
             )}
           </div>
         </ImageBackground>
