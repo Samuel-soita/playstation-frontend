@@ -30,12 +30,13 @@ export const PWAInstallPrompt = () => {
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
+      // Store the event for potential manual triggering
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show prompt after a delay
+      // Don't prevent default to allow browser's native install banner
+      // Show custom prompt as additional option
       setTimeout(() => {
         setShowPrompt(true);
-      }, 3000);
+      }, 5000); // Show after native banner might appear
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);

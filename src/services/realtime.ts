@@ -12,7 +12,8 @@ class RealtimeService {
   }
 
   private connect() {
-    const baseURL = import.meta.env.DEV ? 'http://localhost:3000' : window.location.origin;
+    // Use relative URL in development so it goes through Vite proxy
+    const baseURL = import.meta.env.DEV ? '' : window.location.origin;
 
     this.socket = io(baseURL, {
       path: '/api/socket.io',
