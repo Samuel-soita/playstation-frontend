@@ -298,6 +298,83 @@ export const input: SxProps<Theme> = {
   fontSize: '1rem',
 };
 
+export const passwordField = (theme: Theme, hasError: boolean = false): SxProps<Theme> => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    transition: 'all 0.3s ease',
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(251, 191, 36, 0.05)'
+      : 'rgba(251, 191, 36, 0.03)',
+    color: theme.palette.mode === 'dark' ? 'white' : theme.palette.text.primary,
+    border: `1px solid ${hasError ? '#f44336' : 'rgba(251, 191, 36, 0.3)'}`,
+    '& fieldset': {
+      borderColor: hasError
+        ? 'rgba(244, 67, 54, 0.6)'
+        : 'rgba(251, 191, 36, 0.5)',
+      borderWidth: '2px',
+    },
+    '&:hover': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(251, 191, 36, 0.08)'
+        : 'rgba(251, 191, 36, 0.05)',
+      transform: 'translateY(-2px)',
+      boxShadow: hasError
+        ? '0 4px 12px rgba(244, 67, 54, 0.2)'
+        : '0 6px 16px rgba(251, 191, 36, 0.3), 0 0 20px rgba(245, 158, 11, 0.2)',
+      '& fieldset': {
+        borderColor: hasError
+          ? 'rgba(244, 67, 54, 0.8)'
+          : 'rgba(251, 191, 36, 0.8)',
+        borderWidth: '2px',
+      },
+    },
+    '&.Mui-focused': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(251, 191, 36, 0.1)'
+        : 'rgba(251, 191, 36, 0.08)',
+      transform: 'translateY(-3px)',
+      boxShadow: hasError
+        ? '0 6px 20px rgba(244, 67, 54, 0.4)'
+        : '0 8px 24px rgba(251, 191, 36, 0.5), 0 0 32px rgba(245, 158, 11, 0.3), 0 0 48px rgba(217, 119, 6, 0.2)',
+      animation: `${glowPulse} 2s ease-in-out infinite`,
+      '& fieldset': {
+        borderColor: hasError ? '#f44336' : '#f59e0b',
+        borderWidth: '3px',
+        boxShadow: hasError ? 'none' : '0 0 8px rgba(245, 158, 11, 0.6)',
+      },
+    },
+  },
+  '& .MuiInputLabel-root': {
+    color: hasError
+      ? '#f44336'
+      : '#d97706',
+    fontFamily: '"Rajdhani", sans-serif',
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    '&.Mui-focused': {
+      color: hasError ? '#f44336' : '#f59e0b',
+      transform: 'scale(1.05)',
+      textShadow: hasError ? 'none' : '0 0 8px rgba(245, 158, 11, 0.6)',
+    },
+  },
+  '& .MuiInputBase-input': {
+    color: theme.palette.mode === 'dark' ? 'white' : theme.palette.text.primary,
+    fontFamily: '"Rajdhani", sans-serif',
+    fontWeight: '500',
+    '&::placeholder': {
+      color: '#d97706',
+      opacity: 0.8,
+      fontWeight: '400',
+    },
+  },
+  '& .MuiFormHelperText-root': {
+    fontFamily: '"Rajdhani", sans-serif',
+    color: hasError ? '#f44336' : '#d97706',
+    fontWeight: '500',
+    marginTop: 0.5,
+  },
+});
+
 export const submitButton: SxProps<Theme> = {
   marginTop: 1,
   padding: 1.25,

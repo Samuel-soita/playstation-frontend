@@ -17,47 +17,66 @@ export const Animated3DScene = ({ isVideo, videoUrl }: Animated3DSceneProps) => 
   useEffect(() => {
     if (isVideo && videoRef.current && hasVideo) {
       const video = videoRef.current;
-      
-      // Set video source explicitly
+
+      // Set video source
       video.src = videoUrl || '';
       video.load();
-      
+
+      let isPlayingAttempted = false;
+
       // Try to play the video
-      const playVideo = async () => {
+      const attemptPlay = async () => {
+        if (isPlayingAttempted) return;
+        isPlayingAttempted = true;
+
         try {
           await video.play();
           console.log('Video playing successfully');
         } catch (err) {
           console.log('Video autoplay prevented:', err);
-          // Try again when user interacts
-          const handleInteraction = () => {
-            video.play().catch(() => {});
-            document.removeEventListener('click', handleInteraction);
-            document.removeEventListener('touchstart', handleInteraction);
+          // Set up user interaction fallback
+          const handleUserInteraction = async () => {
+            try {
+              await video.play();
+              console.log('Video started after user interaction');
+            } catch (playErr) {
+              console.log('Video play failed even after interaction:', playErr);
+            }
+            // Clean up listeners
+            document.removeEventListener('click', handleUserInteraction);
+            document.removeEventListener('touchstart', handleUserInteraction);
+            document.removeEventListener('keydown', handleUserInteraction);
           };
-          document.addEventListener('click', handleInteraction, { once: true });
-          document.addEventListener('touchstart', handleInteraction, { once: true });
+
+          document.addEventListener('click', handleUserInteraction, { once: true });
+          document.addEventListener('touchstart', handleUserInteraction, { once: true });
+          document.addEventListener('keydown', handleUserInteraction, { once: true });
         }
       };
-      
-      // Ensure video plays when ready
-      const handleCanPlay = () => {
-        playVideo();
+
+      // Wait for video to be ready, then attempt to play
+      const handleCanPlayThrough = () => {
+        attemptPlay();
       };
-      
-      const handleLoadedData = () => {
-        playVideo();
+
+      video.addEventListener('canplaythrough', handleCanPlayThrough);
+
+      // Fallback: try to play when metadata is loaded
+      const handleLoadedMetadata = () => {
+        // Small delay to ensure video is fully ready
+        setTimeout(() => {
+          if (!isPlayingAttempted) {
+            attemptPlay();
+          }
+        }, 100);
       };
-      
-      video.addEventListener('canplay', handleCanPlay);
-      video.addEventListener('loadeddata', handleLoadedData);
-      
-      // Initial play attempt
-      playVideo();
-      
+
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+
       return () => {
-        video.removeEventListener('canplay', handleCanPlay);
-        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplaythrough', handleCanPlayThrough);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        isPlayingAttempted = false;
       };
     }
   }, [isVideo, hasVideo, videoUrl]);
@@ -103,9 +122,6 @@ export const Animated3DScene = ({ isVideo, videoUrl }: Animated3DSceneProps) => 
             }}
             onCanPlay={() => {
               console.log('Video can play');
-              if (videoRef.current) {
-                videoRef.current.play().catch(err => console.log('Play error:', err));
-              }
             }}
             onPlaying={() => {
               console.log('Video is playing!');
