@@ -390,25 +390,43 @@ export const CrudOperations = memo(() => {
               </button>
             </div>
 
-            {/* Related Tabs Navigation */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Related:</span>
-              {navigateToRelatedTabs(tabValue).slice(0, 3).map((relatedTabIndex) => {
-                const tabLabels = [
-                  "Game Spaces", "Games", "Sessions", "Invoices", "Payments",
-                  "Caffe", "Caffe Settings", "M-Pesa", "Payment Entries", "Customers",
-                  "Companies", "Accounts", "Items", "All Sessions", "Reports"
-                ];
-                return (
-                  <button
-                    key={relatedTabIndex}
-                    onClick={() => navigateToTab(relatedTabIndex)}
-                    className="px-3 py-1 text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md transition-colors duration-200"
-                  >
-                    {tabLabels[relatedTabIndex]}
-                  </button>
-                );
-              })}
+            {/* Quick Access & Related Tabs Navigation */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Quick Access:</span>
+                <button
+                  onClick={() => navigate('/game-library')}
+                  className="px-3 py-1 text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-md transition-colors duration-200 flex items-center gap-1"
+                >
+                  📚 Games
+                </button>
+                <button
+                  onClick={() => navigate('/game-space-manager')}
+                  className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md transition-colors duration-200 flex items-center gap-1"
+                >
+                  🏢 Spaces
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Related:</span>
+                {navigateToRelatedTabs(tabValue).slice(0, 2).map((relatedTabIndex) => {
+                  const tabLabels = [
+                    "Game Spaces", "Games", "Sessions", "Invoices", "Payments",
+                    "Caffe", "Caffe Settings", "M-Pesa", "Payment Entries", "Customers",
+                    "Companies", "Accounts", "Items", "All Sessions", "Reports"
+                  ];
+                  return (
+                    <button
+                      key={relatedTabIndex}
+                      onClick={() => navigateToTab(relatedTabIndex)}
+                      className="px-3 py-1 text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md transition-colors duration-200"
+                    >
+                      {tabLabels[relatedTabIndex]}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

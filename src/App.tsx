@@ -12,6 +12,8 @@ const Portal = lazy(() => import('@/pages/Portal').then(module => ({ default: mo
 const Caffe = lazy(() => import('@/pages/Caffe').then(module => ({ default: module.Caffe })));
 const CrudOperations = lazy(() => import('@/pages/CrudOperations').then(module => ({ default: module.CrudOperations })));
 const GameSessionWorkflowPage = lazy(() => import('@/pages/GameSessionWorkflow').then(module => ({ default: module.GameSessionWorkflowPage })));
+const GameLibraryPage = lazy(() => import('@/pages/GameLibraryPage').then(module => ({ default: module.GameLibraryPage })));
+const GameSpaceManagerPage = lazy(() => import('@/pages/GameSpaceManagerPage').then(module => ({ default: module.GameSpaceManagerPage })));
 
 // Loading component for lazy-loaded routes
 const LoadingFallback = () => (
@@ -61,6 +63,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <GameSessionWorkflowPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/game-library"
+                element={
+                  <ProtectedRoute>
+                    <GameLibraryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/game-space-manager"
+                element={
+                  <ProtectedRoute>
+                    <GameSpaceManagerPage />
                   </ProtectedRoute>
                 }
               />

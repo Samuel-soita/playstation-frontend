@@ -47,6 +47,18 @@ export const Navigation: React.FC<NavigationProps> = memo(({ variant = 'header',
       path: '/game-session-workflow',
       icon: <span className="text-lg">🎯</span>,
       description: 'Game Session Workflow'
+    },
+    {
+      name: 'Game Library',
+      path: '/game-library',
+      icon: <span className="text-lg">📚</span>,
+      description: 'Manage Game Collection'
+    },
+    {
+      name: 'Game Spaces',
+      path: '/game-space-manager',
+      icon: <span className="text-lg">🏢</span>,
+      description: 'Manage Gaming Stations'
     }
   ], []);
 
