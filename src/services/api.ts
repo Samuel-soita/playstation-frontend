@@ -13,7 +13,7 @@ class ApiService {
 
   constructor() {
     // Use relative path in development to leverage Vite proxy, or full URL in production
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 
+    this.baseURL = import.meta.env.VITE_API_BASE_URL ||
       (import.meta.env.DEV ? '' : 'http://localhost:8000');
     this.api = axios.create({
       baseURL: this.baseURL,
@@ -228,10 +228,19 @@ class ApiService {
   /**
    * Get list of documents (generic Frappe API)
    */
-  async getList(doctype: string, filters?: Record<string, any>, fields?: string[]) {
+  async getList(doctype: string, filters?: any, fields?: string[]) {
+    let formattedFilters = filters;
+    if (filters && typeof filters === 'object' && !Array.isArray(filters)) {
+      formattedFilters = Object.entries(filters)
+        .filter(([_, value]) => value !== undefined && value !== null)
+        .map(([key, value]) => [key, '=', value]);
+    }
+
     const response = await this.api.get('/api/resource/' + doctype, {
       params: {
-        filters: filters ? JSON.stringify(filters) : undefined,
+        filters: formattedFilters && Array.isArray(formattedFilters) && formattedFilters.length > 0
+          ? JSON.stringify(formattedFilters)
+          : undefined,
         fields: fields ? JSON.stringify(fields) : undefined,
       },
     });
@@ -342,9 +351,9 @@ class ApiService {
     if (!gameSpaces || gameSpaces.length === 0) {
       throw new Error('Game Space not found');
     }
-    
+
     const gameSpaceName = gameSpaces[0].name;
-    
+
     // Update the occupied field using Frappe's set_value API
     await this.api.post('/api/method/frappe.client.set_value', {
       doctype: 'Game Space',
@@ -406,14 +415,10 @@ class ApiService {
   async getMpesaTransactions() {
     return this.getList('Mpesa Transactions', {}, [
       'name',
-      'transaction_id',
+      'transid',
       'amount',
       'msisdn',
-      'is_complete',
-      'sync_status',
-      'external_reference',
-      'mpesa_receipt',
-      'created_at',
+      'creation',
     ]);
   }
 
@@ -479,8 +484,7 @@ class ApiService {
       'party_type',
       'party',
       'received_amount',
-      'reference_doctype',
-      'reference_name',
+      'reference_no',
       'posting_date',
       'remarks',
     ]);

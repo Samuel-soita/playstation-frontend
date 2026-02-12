@@ -59,6 +59,16 @@ const STEPS = [
 ];
 
 export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComplete, onBack }) => {
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error' | 'info';
+  }>({ open: false, message: '', severity: 'success' });
+
+  const showSnackbar = useCallback((message: string, severity: 'success' | 'error' | 'info' = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  }, []);
+
   const { gameSpaces, activeSessions, connectionStatus, notifications } = useRealtime();
 
   const [workflow, setWorkflow] = useState<WorkflowState>({
@@ -72,11 +82,6 @@ export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComp
 
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info';
-  }>({ open: false, message: '', severity: 'success' });
 
   const [paymentDialog, setPaymentDialog] = useState({
     open: false,
@@ -87,15 +92,37 @@ export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComp
     accountNumber: '',
   });
 
+
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [gamesData] = await Promise.all([
+        const [gamesData, spacesData, activeSessionsData] = await Promise.all([
           apiService.getGames(),
+          apiService.getGameSpaces(),
+          apiService.getActiveSessions(),
         ]);
         setGames(gamesData);
+
+        // Recover state if there's an active session
+        if (activeSessionsData.length > 0) {
+          // For now, take the first active session as the "recovered" session
+          const session = activeSessionsData[0];
+          const space = spacesData.find((s: any) => s.game_space_id === session.game_space_selected || s.name === session.game_space_selected);
+          const game = gamesData.find((g: any) => g.name_of_the_game === session.game_played || g.name === session.game_played);
+
+          if (session) {
+            setWorkflow(prev => ({
+              ...prev,
+              activeSession: session,
+              selectedSpace: space || null,
+              selectedGame: game || null,
+              currentStep: 'monitor_session'
+            }));
+            showSnackbar('Active session restored!', 'info');
+          }
+        }
       } catch (error: any) {
         showSnackbar(error.message || 'Failed to load data', 'error');
       } finally {
@@ -103,7 +130,7 @@ export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComp
       }
     };
     loadData();
-  }, []);
+  }, [showSnackbar]);
 
   // Real-time session updates
   useEffect(() => {
@@ -131,10 +158,6 @@ export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComp
       }
     }
   }, [notifications.sessionEvents, workflow.activeSession]);
-
-  const showSnackbar = useCallback((message: string, severity: 'success' | 'error' | 'info' = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  }, []);
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -566,7 +589,7 @@ export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComp
             height: 8,
             borderRadius: '50%',
             backgroundColor: connectionStatus === 'connected' ? '#10b981' :
-                           connectionStatus === 'connecting' ? '#f59e0b' : '#ef4444'
+              connectionStatus === 'connecting' ? '#f59e0b' : '#ef4444'
           }} />
           <Typography variant="body2" color="text.secondary">
             Real-time: {connectionStatus}
@@ -588,7 +611,7 @@ export const GameSessionWorkflow: React.FC<GameSessionWorkflowProps> = ({ onComp
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: getStepIndex(workflow.currentStep) > index ? '#10b981' :
-                                 getStepIndex(workflow.currentStep) === index ? '#f59e0b' : '#e5e7eb',
+                    getStepIndex(workflow.currentStep) === index ? '#f59e0b' : '#e5e7eb',
                   color: 'white',
                 }}>
                   {step.icon}

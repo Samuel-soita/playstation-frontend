@@ -42,12 +42,12 @@ import { GameSpace } from '@/types';
 interface GameSpaceFormData {
   game_space_id: string;
   playstation_type: 'PS4' | 'PS5' | 'PS4 Pro' | 'PS5 Digital';
-  tv_type: 'LED' | 'LCD' | 'OLED' | 'Plasma' | 'CRT';
+  tv_type: 'LED' | 'LCD' | 'OLED' | 'Plasma' | 'CRT' | 'Sony Bravia';
   occupied: 'Occupied' | 'Not Occupied';
 }
 
 const PLAYSTATION_TYPES = ['PS4', 'PS5', 'PS4 Pro', 'PS5 Digital'];
-const TV_TYPES = ['LED', 'LCD', 'OLED', 'Plasma', 'CRT'];
+const TV_TYPES = ['LED', 'LCD', 'OLED', 'Plasma', 'CRT', 'Sony Bravia'];
 
 export const GameSpaceManager: React.FC = () => {
   const [gameSpaces, setGameSpaces] = useState<GameSpace[]>([]);

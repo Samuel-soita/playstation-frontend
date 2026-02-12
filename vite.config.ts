@@ -125,6 +125,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      '/api/socket.io': {
+        target: 'http://localhost:9000',
+        ws: true,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/socket\.io/, '/socket.io'),
+      },
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
